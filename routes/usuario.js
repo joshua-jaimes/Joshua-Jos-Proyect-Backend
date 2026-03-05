@@ -1,0 +1,65 @@
+import { Router } from "express";
+import { deleteUsuario, getUsuario, getUsuarioEmail, postUsuario, putUsuario, putUsuarioActivar, putUsuarioInactivar , registerUser    } from "../controllers/usuario.js";
+import { validarCampos } from "../middlewares/validar-campos.js";
+import { check } from "express-validator";
+import { validarEmail, validarExisteUsuario } from "../helpers/usuarios.js";
+import { loginUsuario } from '../controllers/usuario.js'
+
+
+
+
+
+const router = new Router()
+
+
+
+
+
+router.post('/login', [
+  check('email', 'El email es obligatorio').not().isEmpty(),
+  check('email', 'No es un email válido').isEmail(),
+  check('password', 'El password debe tener al menos 6 caracteres').isLength({ min: 6 }),
+  validarCampos
+], loginUsuario)
+
+
+router.get("/email", [
+    check('email').not().isEmpty(),
+    check('email', "No es un email valido").isEmail(),
+    validarCampos
+], getUsuarioEmail)
+
+router.get("/", getUsuario)
+
+
+router.post("/", [
+    check('nombre').not().isEmpty().isLength({min:3,max:50}),
+    check('Apellido').not().isAlpha('es-ES', {ignore: ' '}),
+    check('edad').isNumeric(),
+    check('fechanacimiento', "formato de fecha no valido").isISO8601().isDate(),
+    check('email').isEmail().normalizeEmail(),    
+    check('correo').custom(validarEmail),
+    validarCampos
+], postUsuario)
+
+
+router.put("/activar/:id", putUsuarioActivar)
+
+router.put("/inactivar/:id", putUsuarioInactivar)
+
+router.put("/:id", [    
+    check('nombre').not().isEmpty(),
+    check('id').isMongoId(),
+    check('id').custom(validarExisteUsuario),
+    validarCampos
+], putUsuario)
+
+
+router.delete("/:id", deleteUsuario)
+
+
+router.post("/register", registerUser)
+
+
+
+export default router

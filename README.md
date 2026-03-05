@@ -1,2 +1,1 @@
-# Joshua-Jos-Proyect-Backend
-Backend Numerolog
+# Actividad-numerologia-mongo-febrero-2026
