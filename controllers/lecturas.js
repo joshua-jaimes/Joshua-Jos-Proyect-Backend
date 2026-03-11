@@ -75,17 +75,8 @@ const postLecturas = async (req, res) => {
         });
       }
 
-      const pagoActivo = await Pago.findOne({
-        usuario_id,
-        fecha_vencimiento: { $gte: new Date() },
-      });
-
-      if (!pagoActivo) {
-        return res.status(403).json({
-          msg: "Tu membresía ha vencido. Debes renovar el pago para acceder a lecturas diarias",
-        });
-      }
-
+      // estado=1 es suficiente para acceder a lecturas diarias
+      // Verificar si ya generó su lectura de hoy
       diaHoy = new Date().toLocaleDateString("en-CA", {
         timeZone: "America/Bogota",
       });

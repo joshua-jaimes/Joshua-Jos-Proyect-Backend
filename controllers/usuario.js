@@ -3,107 +3,108 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 
 
-const getUsuario= async (req,res)=>{
-    try {
-        const usuarios= await Usuario.find()
-        res.json({usuarios})
-    } catch (error) {
-        res.status(400).json({error})
-    }
+const getUsuario = async (req, res) => {
+  try {
+    const usuarios = await Usuario.find()
+    res.json({ usuarios })
+  } catch (error) {
+    res.status(400).json({ error })
+  }
 }
 
-const getUsuarioEmail= async (req,res)=>{
-    try {
-        const {email}=req.query
-        const usuarios= await Usuario.find({email})
-        res.json({usuarios})
-    } catch (error) {
-        res.status(400).json({error})
-    }
+const getUsuarioEmail = async (req, res) => {
+  try {
+    const { email } = req.query
+    const usuarios = await Usuario.find({ email })
+    res.json({ usuarios })
+  } catch (error) {
+    res.status(400).json({ error })
+  }
 }
 
 const postUsuario = async (req, res) => {
-    try {
+  try {
 
-        const { nombre, edad, fechanacimiento, email, password } = req.body
+    const { nombre, edad, fechanacimiento, email, password } = req.body
 
-        // 🔐 Hashear contraseña
-        const salt = bcrypt.genSaltSync(10)
-        const passwordHash = bcrypt.hashSync(password, salt)
+    // 🔐 Hashear contraseña
+    const salt = bcrypt.genSaltSync(10)
+    const passwordHash = bcrypt.hashSync(password, salt)
 
-        const usuario = new Usuario({
-            nombre,
-            edad,
-            fechanacimiento,
-            email,
-            password: passwordHash, // 👈 guardamos hash
-            estado: 0
-        })
+    const usuario = new Usuario({
+      nombre,
+      edad,
+      fechanacimiento,
+      email,
+      password: passwordHash, // 👈 guardamos hash
+      estado: 0,
+      rol: "usuario"
+    })
 
-        await usuario.save()
+    await usuario.save()
 
-        res.json({ usuario, msg: "Usuario creado correctamente" })
+    res.json({ usuario, msg: "Usuario creado correctamente" })
 
-    } catch (error) {
-        res.status(400).json({ error })
-    }
+  } catch (error) {
+    res.status(400).json({ error })
+  }
 }
 
 
-const putUsuario=async(req,res)=>{
-    try {
-        const {nombre}=req.body
-        const {id}=req.params
+const putUsuario = async (req, res) => {
+  try {
+    const { nombre } = req.body
+    const { id } = req.params
 
-        await Usuario.findByIdAndUpdate(id,{nombre})
+    await Usuario.findByIdAndUpdate(id, { nombre })
 
-        res.json({msg:"Usuario modificado correctamente"})
-    } catch (error) {
-          res.status(400).json({error})
-    }
-    
+    res.json({ msg: "Usuario modificado correctamente" })
+  } catch (error) {
+    res.status(400).json({ error })
+  }
 
-}
-
-const putUsuarioActivar=async(req,res)=>{
-    try {
-        const {id}=req.params
-
-        await Usuario.findByIdAndUpdate(id,{estado:1})
-
-        res.json({msg:"Usuario activado correctamente"})
-    } catch (error) {
-          res.status(400).json({error})
-    }
-    
 
 }
 
-const putUsuarioInactivar=async(req,res)=>{
-    try {
-        const {id}=req.params
+const putUsuarioActivar = async (req, res) => {
+  try {
+    const { id } = req.params
 
-        await Usuario.findByIdAndUpdate(id,{estado:0})
+    await Usuario.findByIdAndUpdate(id, { estado: 1 })
 
-        res.json({msg:"Usuario inactivado correctamente"})
-    } catch (error) {
-          res.status(400).json({error})
-    }
-    
+    res.json({ msg: "Usuario activado correctamente" })
+  } catch (error) {
+    res.status(400).json({ error })
+  }
+
 
 }
 
-const deleteUsuario=async(req,res)=>{
-    try {
-        const {id}=req.params
+const putUsuarioInactivar = async (req, res) => {
+  try {
+    const { id } = req.params
 
-        await Usuario.findByIdAndDelete(id)
+    await Usuario.findByIdAndUpdate(id, { estado: 0 })
 
-        res.json({msg:"Usuario eliminado correctamente"})
-    } catch (error) {
-          res.status(400).json({error})
-    }
-    
+    res.json({ msg: "Usuario inactivado correctamente" })
+  } catch (error) {
+    res.status(400).json({ error })
+  }
+
+
+}
+
+const deleteUsuario = async (req, res) => {
+  try {
+    const { id } = req.params
+
+    await Usuario.findByIdAndDelete(id)
+
+    res.json({ msg: "Usuario eliminado correctamente" })
+  } catch (error) {
+    res.status(400).json({ error })
+  }
+
 
 }
 
@@ -160,7 +161,8 @@ export const registerUser = async (req, res) => {
       fechanacimiento: dob,  // 👈 importante
       edad: age,
       email,
-      password: hashedPassword
+      password: hashedPassword,
+      rol: "usuario"
     });
 
     await nuevoUsuario.save();
@@ -173,4 +175,29 @@ export const registerUser = async (req, res) => {
   }
 };
 
-export {getUsuario,postUsuario,putUsuario,putUsuarioActivar,putUsuarioInactivar,deleteUsuario, getUsuarioEmail, loginUsuario}
+export const cambiarPassword = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { passwordActual, nuevaPassword } = req.body
+
+    // Buscar usuario con contraseña
+    const usuario = await Usuario.findById(id)
+    if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' })
+
+    // Verificar contraseña actual
+    const esCorrecto = await bcrypt.compare(passwordActual, usuario.password)
+    if (!esCorrecto) return res.status(401).json({ error: 'La contraseña actual es incorrecta' })
+
+    // Hashear nueva contraseña
+    const salt = bcrypt.genSaltSync(10)
+    const passwordHash = bcrypt.hashSync(nuevaPassword, salt)
+
+    await Usuario.findByIdAndUpdate(id, { password: passwordHash })
+
+    res.json({ msg: 'Contraseña actualizada correctamente' })
+  } catch (error) {
+    res.status(500).json({ error: 'Error al cambiar la contraseña' })
+  }
+}
+
+export { getUsuario, postUsuario, putUsuario, putUsuarioActivar, putUsuarioInactivar, deleteUsuario, getUsuarioEmail, loginUsuario }
