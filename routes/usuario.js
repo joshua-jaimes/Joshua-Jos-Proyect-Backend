@@ -33,12 +33,12 @@ router.get("/", getUsuario)
 
 
 router.post("/", [
-    check('nombre').not().isEmpty().isLength({ min: 3, max: 50 }),
-    check('Apellido').not().isAlpha('es-ES', { ignore: ' ' }),
-    check('edad').isNumeric(),
-    check('fechanacimiento', "formato de fecha no valido").isISO8601().isDate(),
-    check('email').isEmail().normalizeEmail(),
-    check('correo').custom(validarEmail),
+    check('nombre', 'El nombre es obligatorio y debe tener entre 3 y 50 caracteres').not().isEmpty().isLength({ min: 3, max: 50 }),
+    check('edad', 'La edad debe ser un número').isNumeric(),
+    check('fechanacimiento', 'El formato de fecha no es válido').isISO8601().isDate(),
+    check('email', 'No es un email válido').isEmail().normalizeEmail(),
+    check('email').custom(validarEmail),
+    check('password', 'La contraseña debe tener al menos 8 caracteres').isLength({ min: 8 }),
     validarCampos
 ], postUsuario)
 
@@ -64,7 +64,15 @@ router.put("/cambiar-password/:id", [
 router.delete("/:id", deleteUsuario)
 
 
-router.post("/register", registerUser)
+router.post("/register", [
+    check('name', 'El nombre es obligatorio y debe tener entre 3 y 50 caracteres').not().isEmpty().isLength({ min: 3, max: 50 }),
+    check('age', 'La edad debe ser un número').isNumeric(),
+    check('dob', 'El formato de fecha no es válido').isISO8601().isDate(),
+    check('email', 'No es un email válido').isEmail().normalizeEmail(),
+    check('email').custom(validarEmail),
+    check('password', 'La contraseña debe tener al menos 8 caracteres').isLength({ min: 8 }),
+    validarCampos
+], registerUser)
 
 
 
