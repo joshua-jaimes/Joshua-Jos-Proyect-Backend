@@ -14,6 +14,10 @@ conectarMongo()
 app.use(cors())
 app.use(express.json())
 
+
+
+
+
 app.use("/api/usuario", usuarioRoute)
 app.use("/api/lecturas", lecturasRoute)
 app.use("/api/pagos", pagosRoute)
