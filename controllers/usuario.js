@@ -1,6 +1,7 @@
 import Usuario from "../models/usuario.js"
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+import nodemailer from 'nodemailer'
 
 
 const getUsuario = async (req, res) => {
@@ -157,17 +158,42 @@ export const registerUser = async (req, res) => {
 
     // Crear usuario
     const nuevoUsuario = new Usuario({
-      nombre: name,          // 👈 importante (ver abajo)
-      fechanacimiento: dob,  // 👈 importante
+      nombre: name,
+      fechanacimiento: dob,
       edad: age,
       email,
       password: hashedPassword,
-      rol: "usuario"
+      rol: "usuario",
+      estado: 0,          // gratuito por defecto
+      plan: "gratuito"    // gratuito por defecto
     });
 
     await nuevoUsuario.save();
 
     res.status(201).json({ message: "Usuario creado correctamente" });
+
+    // Enviar correo de bienvenida (NO bloqueante)
+    try {
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS
+        }
+      });
+
+      const mailOptions = {
+        from: `"NumAI" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: '¡Bienvenido a NumAI!',
+        text: `Hola ${name},\n\nTu cuenta ha sido creada exitosamente en nuestro sistema de numerología.\nYa puedes iniciar sesión y comenzar a usar la plataforma.\n\nSaludos,\nEl equipo de NumAI.`
+      };
+
+      // Si falla, solo muestra en consola y no interrumpe porque no tiene await
+      transporter.sendMail(mailOptions).catch(err => console.error("Error enviando email:", err));
+    } catch (emailError) {
+      console.error("Error configurando nodemailer:", emailError);
+    }
 
   } catch (error) {
     console.error(error);
@@ -201,3 +227,27 @@ export const cambiarPassword = async (req, res) => {
 }
 
 export { getUsuario, postUsuario, putUsuario, putUsuarioActivar, putUsuarioInactivar, deleteUsuario, getUsuarioEmail, loginUsuario }
+
+// Activa premium tras pago aprobado — llamado desde el webhook/success de MP
+export const activarPremium = async (req, res) => {
+  try {
+    const { usuario_id } = req.body   // viene del external_reference de MP
+
+    if (!usuario_id || usuario_id === 'sin_usuario') {
+      return res.status(400).json({ error: 'usuario_id requerido' })
+    }
+
+    const usuario = await Usuario.findByIdAndUpdate(
+      usuario_id,
+      { estado: 1, plan: 'premium' },
+      { new: true }
+    )
+
+    if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' })
+
+    res.json({ msg: 'Plan premium activado correctamente', usuario })
+  } catch (error) {
+    console.error('Error activando premium:', error)
+    res.status(500).json({ error: 'Error al activar premium' })
+  }
+}

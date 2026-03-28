@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { deleteUsuario, getUsuario, getUsuarioEmail, postUsuario, putUsuario, putUsuarioActivar, putUsuarioInactivar, registerUser, cambiarPassword } from "../controllers/usuario.js";
+import { deleteUsuario, getUsuario, getUsuarioEmail, postUsuario, putUsuario, putUsuarioActivar, putUsuarioInactivar, registerUser, cambiarPassword, activarPremium } from "../controllers/usuario.js";
 import { validarCampos } from "../middlewares/validar-campos.js";
 import { check } from "express-validator";
 import { validarEmail, validarExisteUsuario } from "../helpers/usuarios.js";
@@ -74,6 +74,7 @@ router.post("/register", [
     validarCampos
 ], registerUser)
 
-
+// Activa premium tras pago aprobado
+router.post("/activar-premium", activarPremium)
 
 export default router

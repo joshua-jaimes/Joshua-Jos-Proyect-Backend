@@ -5,7 +5,8 @@ const usuario = new mongoose.Schema({
   edad: { type: Number },
   fechanacimiento: { type: Date, default: Date.now },
   email: { type: String, unique: true },
-  estado: { type: Number, default: 1 },
+  estado: { type: Number, default: 0 },   // 0 = gratuito, 1 = premium
+  plan: { type: String, default: 'gratuito' }, // 'gratuito' | 'premium'
   rol: { type: String, enum: ["usuario", "admin"], default: "usuario" },
   password: {
     type: String,

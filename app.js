@@ -1,5 +1,6 @@
 import express from "express"
 import cors from "cors"
+import path from "path"
 import 'dotenv/config'
 import { conectarMongo } from "./database/cnx-mongo.js"
 import usuarioRoute from "./routes/usuario.js"
@@ -14,9 +15,8 @@ conectarMongo()
 app.use(cors())
 app.use(express.json())
 
-
-
-
+// Servir el frontend buildeado desde la carpeta public
+app.use(express.static(path.join(path.dirname(new URL(import.meta.url).pathname), 'public')))
 
 app.use("/api/usuario", usuarioRoute)
 app.use("/api/lecturas", lecturasRoute)
