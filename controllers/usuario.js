@@ -44,6 +44,64 @@ const postUsuario = async (req, res) => {
 
     await usuario.save()
 
+    // 📧 Enviar correo de bienvenida (Separado para que si falla no dañe el registro)
+    try {
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.EMAIL_USER || 'tu_correo@gmail.com',
+          pass: process.env.EMAIL_PASS || 'tu_contraseña_app'
+        }
+      })
+
+      const mailOptions = {
+        from: `"Numerología AI" <${process.env.EMAIL_USER || 'noreply@numerologia.ai'}>`,
+        to: email,
+        subject: "Bienvenido a Numerología AI",
+        html: `
+          <div style="font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 40px 0; color: #2d3748;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+              
+              <!-- Header Gradient -->
+              <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center;">
+                <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; letter-spacing: 1px;">Bienvenido a Numerología AI</h1>
+              </div>
+              
+              <!-- Content Body -->
+              <div style="padding: 40px 30px;">
+                <h2 style="margin-top: 0; color: #2d3748; font-size: 22px;">¡Hola, ${nombre}! 🌟</h2>
+                <p style="font-size: 16px; line-height: 1.6; color: #4a5568; margin-bottom: 25px;">
+                  Nos emociona tenerte con nosotros. Prepárate para descubrir todos los secretos y explorar el verdadero potencial que los números tienen para ofrecerte.
+                </p>
+                
+                <div style="text-align: center; margin: 35px 0;">
+                  <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/login" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 50px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4); display: inline-block;">
+                    Iniciar sesión
+                  </a>
+                </div>
+                
+                <p style="font-size: 15px; line-height: 1.6; color: #718096; margin-bottom: 0;">
+                  Si tienes alguna pregunta, no dudes en contactarnos.<br>¡Disfruta mucho de la plataforma!
+                </p>
+              </div>
+              
+              <!-- Footer -->
+              <div style="background-color: #f8fafc; padding: 24px; text-align: center; border-top: 1px solid #e2e8f0;">
+                <p style="font-size: 14px; color: #718096; margin: 0; font-weight: 500;">Tu cuenta fue creada exitosamente.</p>
+                <p style="font-size: 13px; color: #a0aec0; margin: 8px 0 0 0;">&copy; 2026 Numerología AI.<br>Todos los derechos reservados.</p>
+              </div>
+              
+            </div>
+          </div>
+        `
+      }
+
+      await transporter.sendMail(mailOptions)
+      console.log(`✅ Correo de bienvenida enviado a: ${email}`)
+    } catch (emailError) {
+      console.error(`❌ Error al enviar el correo a ${email}:`, emailError.message)
+    }
+
     res.json({ usuario, msg: "Usuario creado correctamente" })
 
   } catch (error) {
