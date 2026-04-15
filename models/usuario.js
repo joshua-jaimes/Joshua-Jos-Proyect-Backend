@@ -11,6 +11,8 @@ const usuario = new mongoose.Schema({
   premiumActivo: { type: Boolean, default: false },    // true al pagar
   fechaPago: { type: Date, default: null },             // compatibilidad
   fechaPagoPremium: { type: Date, default: null },      // fecha del pago aprobado
+  resetPasswordToken: { type: String },
+  resetPasswordExpires: { type: Date },
   rol: { type: String, enum: ["usuario", "admin"], default: "usuario" },
   password: {
     type: String,

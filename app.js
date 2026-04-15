@@ -7,6 +7,7 @@ import usuarioRoute from "./routes/usuario.js"
 import lecturasRoute from "./routes/lecturas.js"
 import pagosRoute from "./routes/pagos.js"
 import mercadopagoRoute from "./routes/mercadopago.js"
+import authRoute from "./routes/authRoute.js"
 
 
 const app = express()
@@ -22,6 +23,7 @@ app.use("/api/usuario", usuarioRoute)
 app.use("/api/lecturas", lecturasRoute)
 app.use("/api/pagos", pagosRoute)
 app.use("/api/mercadopago", mercadopagoRoute)
+app.use("/api/auth", authRoute)
 
 
 app.listen(process.env.PORT, () => {
