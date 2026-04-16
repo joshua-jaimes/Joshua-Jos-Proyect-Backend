@@ -99,7 +99,7 @@ export const crearPreferencia = async (req, res) => {
       },
       // auto_return: "approved" → ACTIVAR en producción (requiere HTTPS)
       // Descomenta esta línea cuando FRONTEND_URL sea HTTPS de Vercel:
-     //  auto_return: "approved",
+       auto_return: "approved",
     };
 
     console.log("  frontendUrl:", frontendUrl);
