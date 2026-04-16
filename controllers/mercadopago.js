@@ -97,7 +97,7 @@ export const crearPreferencia = async (req, res) => {
         failure: `${frontendUrl}/pago-fallido`,
         pending: `${frontendUrl}/pago-pendiente`,
       },
-       auto_return: "approved" → ACTIVAR en producción (requiere HTTPS)
+      // auto_return: "approved" → ACTIVAR en producción (requiere HTTPS)
       // Descomenta esta línea cuando FRONTEND_URL sea HTTPS de Vercel:
       // auto_return: "approved",
     };
