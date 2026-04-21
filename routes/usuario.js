@@ -34,8 +34,7 @@ router.get("/", getUsuario)
 
 router.post("/", [
     check('nombre', 'El nombre es obligatorio y debe tener entre 3 y 50 caracteres').not().isEmpty().isLength({ min: 3, max: 50 }),
-    check('edad', 'La edad debe ser un número').isNumeric(),
-    check('fechanacimiento', 'El formato de fecha no es válido').isISO8601().isDate(),
+    check('fechanacimiento', 'El formato de fecha no es válido').optional().isISO8601(),
     check('email', 'No es un email válido').isEmail().normalizeEmail(),
     check('email').custom(validarEmail),
     check('password', 'La contraseña debe tener al menos 8 caracteres').isLength({ min: 8 }),
@@ -66,8 +65,8 @@ router.delete("/:id", deleteUsuario)
 
 router.post("/register", [
     check('name', 'El nombre es obligatorio y debe tener entre 3 y 50 caracteres').not().isEmpty().isLength({ min: 3, max: 50 }),
-    check('age', 'La edad debe ser un número').isNumeric(),
-    check('dob', 'El formato de fecha no es válido').isISO8601().isDate(),
+    check('dob', 'La fecha de nacimiento es obligatoria').not().isEmpty(),
+    check('dob', 'El formato de fecha no es válido').isISO8601(),
     check('email', 'No es un email válido').isEmail().normalizeEmail(),
     check('email').custom(validarEmail),
     check('password', 'La contraseña debe tener al menos 8 caracteres').isLength({ min: 8 }),

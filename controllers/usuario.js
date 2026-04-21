@@ -26,7 +26,7 @@ const getUsuarioEmail = async (req, res) => {
 const postUsuario = async (req, res) => {
   try {
 
-    const { nombre, edad, fechanacimiento, email, password } = req.body
+    const { nombre, fechanacimiento, email, password } = req.body
 
     // 🔐 Hashear contraseña
     const salt = bcrypt.genSaltSync(10)
@@ -34,10 +34,9 @@ const postUsuario = async (req, res) => {
 
     const usuario = new Usuario({
       nombre,
-      edad,
       fechanacimiento,
       email,
-      password: passwordHash, // 👈 guardamos hash
+      password: passwordHash,
       estado: 0,
       rol: "usuario"
     })
@@ -169,66 +168,88 @@ const deleteUsuario = async (req, res) => {
 
 const loginUsuario = async (req, res) => {
   try {
+    const { email: emailRaw, password } = req.body
 
-    const { email, password } = req.body
+    // Normalizar email exactamente igual que en el registro
+    const email = emailRaw?.toString().toLowerCase().trim()
+
+    console.log('\n🔑 [login] Intento de login:')
+    console.log('  email recibido  :', emailRaw)
+    console.log('  email normalizado:', email)
 
     const usuario = await Usuario.findOne({ email })
+    console.log('  usuario encontrado:', usuario ? '✅ SÍ' : '❌ NO')
+
     if (!usuario) {
-      return res.status(401).json({ msg: "Credenciales incorrectas" })
+      return res.status(401).json({ error: 'No existe una cuenta con ese correo' })
     }
 
     const esCorrecto = await bcrypt.compare(password, usuario.password)
+    console.log('  bcrypt.compare   :', esCorrecto ? '✅ CORRECTO' : '❌ INCORRECTO')
+
     if (!esCorrecto) {
-      return res.status(401).json({ msg: "Credenciales incorrectas" })
+      return res.status(401).json({ error: 'Contraseña incorrecta' })
     }
 
     const token = jwt.sign(
       { uid: usuario._id },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: '8h' }
     )
 
     const { password: _, ...usuarioSinPassword } = usuario.toObject()
 
+    console.log('  ✨ Login exitoso para:', email)
     res.json({
       token,
       usuario: usuarioSinPassword
     })
 
   } catch (error) {
-    res.status(500).json({ msg: "Error en el servidor" })
+    console.error('❌ [login] Error:', error.message)
+    res.status(500).json({ error: 'Error en el servidor' })
   }
 }
 
 
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, dob, age, password } = req.body;
+    const { name, email: emailRaw, dob, password } = req.body;
 
-    // Verificar si ya existe
+    // Normalizar email igual que en el login (evita problemas de mayúsculas)
+    const email = emailRaw?.toString().toLowerCase().trim()
+
+    console.log('📥 [register] Body recibido:', { name, email, dob, password: password ? '***' : 'VACÍO' });
+
+    // Validar campos mínimos manualmente (segunda línea de defensa)
+    if (!name || !email || !dob || !password) {
+      return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+    }
+
+    // Verificar si el correo ya existe
     const existe = await Usuario.findOne({ email });
     if (existe) {
-      return res.status(400).json({ error: "El correo ya está registrado" });
+      return res.status(400).json({ error: 'El correo ya está registrado, usa otro' });
     }
 
     // Encriptar contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Crear usuario
+    // Crear usuario (sin campo edad)
     const nuevoUsuario = new Usuario({
       nombre: name,
       fechanacimiento: dob,
-      edad: age,
       email,
       password: hashedPassword,
-      rol: "usuario",
-      estado: 0,          // gratuito por defecto
-      plan: "gratuito"    // gratuito por defecto
+      rol: 'usuario',
+      estado: 0,
+      plan: 'gratuito'
     });
 
     await nuevoUsuario.save();
+    console.log('✅ [register] Usuario creado:', email);
 
-    res.status(201).json({ message: "Usuario creado correctamente" });
+    res.status(201).json({ message: 'Usuario creado correctamente' });
 
     // Enviar correo de bienvenida (NO bloqueante)
     try {
@@ -247,15 +268,14 @@ export const registerUser = async (req, res) => {
         text: `Hola ${name},\n\nTu cuenta ha sido creada exitosamente en nuestro sistema de numerología.\nYa puedes iniciar sesión y comenzar a usar la plataforma.\n\nSaludos,\nEl equipo de NumAI.`
       };
 
-      // Si falla, solo muestra en consola y no interrumpe porque no tiene await
-      transporter.sendMail(mailOptions).catch(err => console.error("Error enviando email:", err));
+      transporter.sendMail(mailOptions).catch(err => console.error('Error enviando email:', err));
     } catch (emailError) {
-      console.error("Error configurando nodemailer:", emailError);
+      console.error('Error configurando nodemailer:', emailError);
     }
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error del servidor" });
+    console.error('❌ [register] Error:', error.message);
+    res.status(500).json({ error: 'Error del servidor al registrar usuario' });
   }
 };
 

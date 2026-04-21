@@ -75,12 +75,12 @@ export const crearPreferencia = async (req, res) => {
     const external_reference = String(usuario_id);
     console.log("  external_reference:", external_reference);
 
-    // ──────────────────────────────────────────────────────────────────────────
-    // IMPORTANTE: auto_return: "approved" es INCOMPATIBLE con URLs localhost.
-    // FRONTEND_URL en .env de Render:
-    //   Desarrollo:  FRONTEND_URL=http://localhost:4173
-    //   Producción:  FRONTEND_URL=https://tu-app.vercel.app
+    // ─── Detectar entorno automáticamente ─────────────────────────────────────
+    // FRONTEND_URL en .env:
+    //   Desarrollo:  FRONTEND_URL=http://localhost:4173   → NO auto_return (MP lo rechaza)
+    //   Producción:  FRONTEND_URL=https://tu-app.vercel.app → auto_return: "approved" ✅
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:4173";
+    const esProduccion = frontendUrl.startsWith("https://");
 
     const preference = {
       items: [
@@ -97,12 +97,14 @@ export const crearPreferencia = async (req, res) => {
         failure: `${frontendUrl}/pago-fallido`,
         pending: `${frontendUrl}/pago-pendiente`,
       },
-      // auto_return: "approved" → ACTIVAR en producción (requiere HTTPS)
-      // Descomenta esta línea cuando FRONTEND_URL sea HTTPS de Vercel:
-      // auto_return: "approved",
+      // auto_return solo funciona con HTTPS (producción). Se activa automáticamente.
+      ...(esProduccion && { auto_return: "approved" }),
     };
 
-    console.log("  frontendUrl:", frontendUrl);
+    console.log("  frontendUrl  :", frontendUrl);
+    console.log("  esProduccion :", esProduccion);
+    console.log("  auto_return  :", esProduccion ? "approved ✅" : "NO enviado (localhost)");
+    console.log("  back_urls    :", preference.back_urls);
     console.log("  Enviando a MP API:", JSON.stringify(preference, null, 2));
 
     const mpResponse = await axios.post(

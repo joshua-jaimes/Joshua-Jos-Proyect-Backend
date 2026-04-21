@@ -28,5 +28,12 @@ app.use("/api/auth", authRoute)
 
 app.listen(process.env.PORT, () => {
     console.log(`Servidor escuchando en el puerto ${process.env.PORT}`);
+    console.log('\n=== 🔧 DIAGNÓSTICO DE VARIABLES DE ENTORNO ===');
+    console.log('  PORT           :', process.env.PORT);
+    console.log('  FRONTEND_URL   :', process.env.FRONTEND_URL || '❌ NO DEFINIDA (usará localhost:4173)');
+    console.log('  MP_TOKEN       :', process.env.MERCADOPAGO_ACCESS_TOKEN ? '✅ definido' : '❌ NO DEFINIDO');
+    console.log('  MONGO_URI      :', process.env.MONGO_URI ? '✅ definido' : '❌ NO DEFINIDO');
+    const fe = process.env.FRONTEND_URL || '';
+    console.log('  auto_return    :', fe.startsWith('https://') ? '✅ ACTIVO (producción HTTPS)' : '⛔ INACTIVO (localhost o no definida)');
+    console.log('==============================================\n');
 })
-
