@@ -21,6 +21,10 @@ const originesPermitidos = [
   'http://localhost:5173',
   'http://localhost:4173',
   'http://localhost:3000',
+  // URL real del frontend en Vercel (hardcodeada como garantía)
+  'https://joshua-jos-proyect-frontend.vercel.app',
+  // Orígenes adicionales desde variable de entorno en Render:
+  //   CORS_ORIGIN=https://mi-otro-dominio.vercel.app
   ...(process.env.CORS_ORIGIN
     ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
     : []),
@@ -28,8 +32,13 @@ const originesPermitidos = [
 
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin) return callback(null, true) // Postman / curl / server-to-server
-    if (originesPermitidos.includes(origin)) {
+    // Sin origin: Postman, curl, peticiones server-to-server → permitir
+    if (!origin) return callback(null, true)
+
+    // Comparación robusta: coincidencia exacta O que el origin empiece con el permitido
+    const permitido = originesPermitidos.some(o => origin === o || origin.startsWith(o))
+
+    if (permitido) {
       callback(null, true)
     } else {
       console.warn(`⛔ CORS bloqueado para: ${origin}`)
