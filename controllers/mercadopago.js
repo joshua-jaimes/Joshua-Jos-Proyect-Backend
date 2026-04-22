@@ -1,5 +1,6 @@
 import axios from "axios";
 import Usuario from "../models/usuario.js";
+import Pago from "../models/pagos.js";
 import mongoose from "mongoose";
 
 // ==== 1. CONFIRMAR PAGO (MongoDB) ====
@@ -37,6 +38,25 @@ export const confirmarPago = async (req, res) => {
 
     if (!usuarioActualizado) {
       return res.status(404).json({ error: "Usuario no encontrado en la BD para actualizar" });
+    }
+
+    // ─── NUEVO: Crear registro en el Historial de Pagos ───
+    const fechaActual = new Date();
+    const fechaVencimiento = new Date();
+    fechaVencimiento.setMonth(fechaVencimiento.getMonth() + 1); // Plan de 1 mes
+
+    try {
+      const nuevoPago = new Pago({
+        usuario_id: objectIdReferencia,
+        monto: 29000, // Monto por defecto del plan Místico Pro
+        fecha_pago: fechaActual,
+        fecha_vencimiento: fechaVencimiento,
+        metodo: 'tarjeta' // MercadoPago generalmente procesa como tarjeta en esta demo
+      });
+      await nuevoPago.save();
+      console.log("✅ Registro de pago guardado en BD:", nuevoPago._id);
+    } catch (errPago) {
+      console.error("⚠️ Error guardando el registro de pago, pero usuario fue actualizado:", errPago);
     }
 
     console.log("✅ USUARIO ACTUALIZADO A PREMIUM:");
