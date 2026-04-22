@@ -38,6 +38,9 @@ export const forgotPassword = async (req, res) => {
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     const resetLink = `${frontendUrl}/reset-password?token=${resetToken}`;
 
+console.log("frontendUrl:", frontendUrl);
+console.log("resetLink:", resetLink);
+    
     const mailOptions = {
         from: `"Numerología AI" <${process.env.EMAIL_USER}>`,
         to: email,

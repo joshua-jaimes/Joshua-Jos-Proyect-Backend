@@ -261,11 +261,58 @@ export const registerUser = async (req, res) => {
         }
       });
 
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
       const mailOptions = {
         from: `"NumAI" <${process.env.EMAIL_USER}>`,
         to: email,
-        subject: '¡Bienvenido a NumAI!',
-        text: `Hola ${name},\n\nTu cuenta ha sido creada exitosamente en nuestro sistema de numerología.\nYa puedes iniciar sesión y comenzar a usar la plataforma.\n\nSaludos,\nEl equipo de NumAI.`
+        subject: '¡Bienvenido a Numerología AI! 🌌',
+        text: `Hola ${name},\n\nTu cuenta ha sido creada exitosamente en nuestro sistema de numerología.\nYa puedes iniciar sesión y comenzar a usar la plataforma.\n\nSaludos,\nEl equipo de Numerología AI.`,
+        html: `
+          <div style="font-family: 'Inter', 'Segoe UI', Arial, sans-serif; background-color: #0f0914; margin: 0; padding: 40px 10px; color: #ffffff;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: #191022; border: 1px solid #2a0b4d; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+              
+              <!-- Header -->
+              <div style="background: linear-gradient(135deg, #7311d4 0%, #2a0b4d 100%); padding: 40px 20px; text-align: center;">
+                <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: 1px;">Numerología AI</h1>
+                <p style="color: #d8b4fe; margin: 10px 0 0 0; font-size: 16px;">Descubre el poder de tus números</p>
+              </div>
+              
+              <!-- Body -->
+              <div style="padding: 40px 30px;">
+                <h2 style="margin-top: 0; color: #f3e8ff; font-size: 24px; font-weight: 600;">¡Hola, ${name}! ✨</h2>
+                <p style="font-size: 16px; line-height: 1.6; color: #d1d5db; margin-bottom: 25px;">
+                  Tu cuenta ha sido creada exitosamente. Estamos emocionados de acompañarte en este viaje de autodescubrimiento y crecimiento espiritual a través de la numerología.
+                </p>
+                
+                <div style="background-color: #231630; border-left: 4px solid #b980ff; padding: 15px 20px; border-radius: 4px; margin-bottom: 30px;">
+                  <p style="margin: 0; color: #e5e7eb; font-size: 15px; line-height: 1.5;">
+                    Ya puedes acceder a tu portal místico y comenzar a explorar tus lecturas personalizadas generadas por inteligencia artificial.
+                  </p>
+                </div>
+                
+                <!-- CTA Button -->
+                <div style="text-align: center; margin: 40px 0;">
+                  <a href="${frontendUrl}" style="background: linear-gradient(135deg, #8f3ce6 0%, #7311d4 100%); color: #ffffff; text-decoration: none; padding: 15px 35px; border-radius: 50px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 15px rgba(115, 17, 212, 0.4); border: 1px solid #b980ff;">
+                    Ir a mi portal
+                  </a>
+                </div>
+                
+                <p style="font-size: 15px; line-height: 1.6; color: #9ca3af; margin-bottom: 0;">
+                  Que el universo guíe tu camino.<br><br>
+                  <strong style="color: #d8b4fe;">El equipo de Numerología AI</strong>
+                </p>
+              </div>
+              
+              <!-- Footer -->
+              <div style="background-color: #120b18; padding: 25px; text-align: center; border-top: 1px solid #2a0b4d;">
+                <p style="font-size: 13px; color: #6b7280; margin: 0;">
+                  &copy; ${new Date().getFullYear()} Numerología AI.<br>Todos los derechos reservados.
+                </p>
+              </div>
+              
+            </div>
+          </div>
+        `
       };
 
       transporter.sendMail(mailOptions).catch(err => console.error('Error enviando email:', err));
