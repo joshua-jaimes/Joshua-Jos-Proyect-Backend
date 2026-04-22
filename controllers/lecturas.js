@@ -164,14 +164,14 @@ Inicia el texto mencionando claramente la fecha de hoy: ${hoy}.
     console.log("📝 Enviando petición a Gemini...");
 
     const axios = (await import("axios")).default;
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
 
     const makeRequest = async (retries = 3, delay = 1000) => {
       try {
         return await axios.post(
           url,
-          { contents: [{ role: "user", parts: [{ text: prompt }] }] },
-          { headers: { "Content-Type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY }, timeout: 20000 }
+          { contents: [{ parts: [{ text: prompt }] }] },
+          { headers: { "Content-Type": "application/json" }, timeout: 20000 }
         );
       } catch (err) {
         if (retries > 0 && err.response && err.response.status === 429) {
