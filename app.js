@@ -13,7 +13,36 @@ import authRoute from "./routes/authRoute.js"
 const app = express()
 conectarMongo()
 
-app.use(cors())
+// ─── CORS: whitelist de orígenes permitidos ────────────────────────────────────
+// En Render, agrega la variable de entorno:
+//   CORS_ORIGIN=https://joshua-jos-proyect-frontend.vercel.app
+// (Si tienes más de un dominio, sepáralos con coma)
+const originesPermitidos = [
+  'http://localhost:5173',
+  'http://localhost:4173',
+  'http://localhost:3000',
+  ...(process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
+    : []),
+]
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true) // Postman / curl / server-to-server
+    if (originesPermitidos.includes(origin)) {
+      callback(null, true)
+    } else {
+      console.warn(`⛔ CORS bloqueado para: ${origin}`)
+      callback(new Error(`Origen no permitido por CORS: ${origin}`))
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-token'],
+}
+
+app.use(cors(corsOptions))
+app.options('*', cors(corsOptions)) // Preflight requests
 app.use(express.json())
 
 // Servir el frontend buildeado desde la carpeta public
