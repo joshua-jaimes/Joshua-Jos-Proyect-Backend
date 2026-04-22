@@ -42,7 +42,8 @@ const corsOptions = {
 }
 
 app.use(cors(corsOptions))
-app.options('*', cors(corsOptions)) // Preflight requests
+// NOTA: app.options('*', ...) no es compatible con Express 5 / path-to-regexp v8.
+// app.use(cors(corsOptions)) ya maneja los preflight OPTIONS automáticamente.
 app.use(express.json())
 
 // Servir el frontend buildeado desde la carpeta public
