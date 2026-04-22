@@ -98,7 +98,11 @@ const postLecturas = async (req, res) => {
     // Verificar API Key
     // ------------------------------
     if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ msg: "API Key no configurada" });
+      console.error("❌ GEMINI_API_KEY no está configurada en las variables de entorno");
+      return res.status(500).json({
+        msg: "El servicio de lecturas no está disponible. Contacta al administrador.",
+        details: "GEMINI_API_KEY no configurada en el servidor"
+      });
     }
 
     const hoy = new Date().toLocaleDateString("es-CO", {
@@ -160,7 +164,7 @@ Inicia el texto mencionando claramente la fecha de hoy: ${hoy}.
     console.log("📝 Enviando petición a Gemini...");
 
     const axios = (await import("axios")).default;
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
 
     const makeRequest = async (retries = 3, delay = 1000) => {
       try {
@@ -200,7 +204,27 @@ Inicia el texto mencionando claramente la fecha de hoy: ${hoy}.
     res.json({ msg: "Lectura creada correctamente", lectura });
   } catch (error) {
     const apiError = error.response?.data?.error;
-    console.error("❌ Gemini Error:", apiError ? JSON.stringify(apiError) : error.message);
+
+    // Diagnóstico detallado en los logs del servidor (visible en Render)
+    console.error("❌ ERROR en postLecturas:");
+    console.error("  Mensaje  :", error.message);
+    console.error("  HTTP     :", error.response?.status);
+    console.error("  Gemini   :", apiError ? JSON.stringify(apiError) : "N/A");
+    console.error("  Stack    :", error.stack?.split("\n")[1]);
+
+    // Respuesta al cliente según tipo de error
+    if (error.response?.status === 429) {
+      return res.status(503).json({
+        msg: "El servicio de lecturas está ocupado. Intenta en unos segundos.",
+        details: "Gemini rate limit"
+      });
+    }
+    if (error.code === "ECONNABORTED" || error.message.includes("timeout")) {
+      return res.status(504).json({
+        msg: "La generación tardó demasiado. Intenta de nuevo.",
+        details: "Gemini timeout"
+      });
+    }
 
     res.status(500).json({
       error: error.message,
@@ -208,6 +232,7 @@ Inicia el texto mencionando claramente la fecha de hoy: ${hoy}.
     });
   }
 };
+
 
 
 
