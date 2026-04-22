@@ -58,15 +58,15 @@ export const forgotPassword = async (req, res) => {
                 </p>
                 
                 <div style="text-align: center; margin: 35px 0;">
-                  <a href="http://localhost:5173/reset-password?token=${resetToken}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 50px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4); display: inline-block;">
+                  <a href="${resetLink}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 50px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4); display: inline-block;">
                     Restablecer mi contraseña
                   </a>
                 </div>
                 
                 <p style="font-size: 14px; line-height: 1.6; color: #718096; margin-bottom: 0;">
                   Si el botón no funciona, copia y pega este enlace en tu navegador:<br>
-                  <a href="http://localhost:5173/reset-password?token=${resetToken}" style="color: #667eea; word-break: break-all;">
-                    http://localhost:5173/reset-password?token=${resetToken}
+                  <a href="${resetLink}" style="color: #667eea; word-break: break-all;">
+                    ${resetLink}
                   </a>
                 </p>
 
