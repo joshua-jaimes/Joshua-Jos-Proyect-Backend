@@ -26,13 +26,18 @@ export const forgotPassword = async (req, res) => {
     await usuario.save();
 
     // Enviar el correo usando Nodemailer con el mismo estilo actual
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER || 'tu_correo@gmail.com',
-        pass: process.env.EMAIL_PASS || 'tu_contraseña_app'
-      }
-    });
+   const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false, // importante
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  },
+  tls: {
+    rejectUnauthorized: false
+  }
+});
 
     // IMPORTANTE: URL que apunta al frontend con query params
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
