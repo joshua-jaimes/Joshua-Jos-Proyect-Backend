@@ -28,14 +28,11 @@ export const forgotPassword = async (req, res) => {
     // Enviar el correo usando Nodemailer con el mismo estilo actual
    const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // importante
+  port: 465,
+  secure: true, // 👈 CAMBIO CLAVE
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
-  },
-  tls: {
-    rejectUnauthorized: false
   }
 });
 
