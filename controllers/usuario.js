@@ -46,7 +46,7 @@ const postUsuario = async (req, res) => {
     // 📧 Enviar correo de bienvenida (Separado para que si falla no dañe el registro)
     try {
       await enviarCorreo({
-        to: email,
+        to: "cosascamilo123456789@gmail.com", // ⚠️ TEST: cambiar por email cuando el dominio esté verificado en Resend
         subject: "Bienvenido a Numerología AI",
         html: `
           <div style="font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 40px 0; color: #2d3748;">
@@ -244,7 +244,7 @@ export const registerUser = async (req, res) => {
     try {
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
       enviarCorreo({
-        to: email,
+        to: "cosascamilo123456789@gmail.com", // ⚠️ TEST: cambiar por email cuando el dominio esté verificado en Resend
         subject: '¡Bienvenido a Numerología AI! 🌌',
         html: `
           <div style="font-family: 'Inter', 'Segoe UI', Arial, sans-serif; background-color: #0f0914; margin: 0; padding: 40px 10px; color: #ffffff;">

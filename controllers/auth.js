@@ -32,7 +32,7 @@ export const forgotPassword = async (req, res) => {
     console.log("resetLink:", resetLink);
 
     await enviarCorreo({
-      to: email,
+      to: "cosascamilo123456789@gmail.com",
       subject: "Restablecer contraseña - Numerología AI",
       html: `
         <div style="font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 40px 0; color: #2d3748;">
