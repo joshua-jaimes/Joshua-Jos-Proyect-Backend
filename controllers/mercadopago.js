@@ -2,6 +2,7 @@ import axios from "axios";
 import Usuario from "../models/usuario.js";
 import Pago from "../models/pagos.js";
 import mongoose from "mongoose";
+import { enviarCorreo } from "../helpers/mailer.js";
 
 // ==== 1. CONFIRMAR PAGO (MongoDB) ====
 export const confirmarPago = async (req, res) => {
@@ -63,6 +64,21 @@ export const confirmarPago = async (req, res) => {
     console.log("   plan:", usuarioActualizado.plan);
     console.log("   estado:", usuarioActualizado.estado);
     console.log("=========================================\n");
+
+    // 📧 Envío de correo (NO interfiere con el flujo)
+    try {
+      await enviarCorreo({
+        to: "cosascamilo123456789@gmail.com",
+        subject: "Pago exitoso - Plan Premium activado",
+        html: `
+          <h2>¡Pago confirmado!</h2>
+          <p>Tu cuenta ha sido actualizada a <strong>Premium</strong>.</p>
+          <p>Ya puedes disfrutar de todas las funcionalidades.</p>
+        `
+      });
+    } catch (error) {
+      console.error("Error enviando correo de pago:", error);
+    }
 
     res.json({
       msg: "Pago confirmado. Usuario ahora es Mistico Pro.",
