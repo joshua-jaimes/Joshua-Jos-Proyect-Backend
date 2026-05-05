@@ -1,7 +1,7 @@
 import Usuario from "../models/usuario.js"
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import nodemailer from 'nodemailer'
+import { enviarCorreo } from '../helpers/mailer.js'
 
 
 const getUsuario = async (req, res) => {
@@ -45,16 +45,7 @@ const postUsuario = async (req, res) => {
 
     // 📧 Enviar correo de bienvenida (Separado para que si falla no dañe el registro)
     try {
-      const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: process.env.EMAIL_USER || 'tu_correo@gmail.com',
-          pass: process.env.EMAIL_PASS || 'tu_contraseña_app'
-        }
-      })
-
-      const mailOptions = {
-        from: `"Numerología AI" <${process.env.EMAIL_USER || 'noreply@numerologia.ai'}>`,
+      await enviarCorreo({
         to: email,
         subject: "Bienvenido a Numerología AI",
         html: `
@@ -93,9 +84,7 @@ const postUsuario = async (req, res) => {
             </div>
           </div>
         `
-      }
-
-      await transporter.sendMail(mailOptions)
+      })
       console.log(`✅ Correo de bienvenida enviado a: ${email}`)
     } catch (emailError) {
       console.error(`❌ Error al enviar el correo a ${email}:`, emailError.message)
@@ -253,20 +242,10 @@ export const registerUser = async (req, res) => {
 
     // Enviar correo de bienvenida (NO bloqueante)
     try {
-      const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS
-        }
-      });
-
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-      const mailOptions = {
-        from: `"NumAI" <${process.env.EMAIL_USER}>`,
+      enviarCorreo({
         to: email,
         subject: '¡Bienvenido a Numerología AI! 🌌',
-        text: `Hola ${name},\n\nTu cuenta ha sido creada exitosamente en nuestro sistema de numerología.\nYa puedes iniciar sesión y comenzar a usar la plataforma.\n\nSaludos,\nEl equipo de Numerología AI.`,
         html: `
           <div style="font-family: 'Inter', 'Segoe UI', Arial, sans-serif; background-color: #0f0914; margin: 0; padding: 40px 10px; color: #ffffff;">
             <div style="max-width: 600px; margin: 0 auto; background-color: #191022; border: 1px solid #2a0b4d; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
@@ -313,11 +292,9 @@ export const registerUser = async (req, res) => {
             </div>
           </div>
         `
-      };
-
-      transporter.sendMail(mailOptions).catch(err => console.error('Error enviando email:', err));
+      }).catch(err => console.error('Error enviando email de bienvenida:', err));
     } catch (emailError) {
-      console.error('Error configurando nodemailer:', emailError);
+      console.error('Error configurando envío de correo:', emailError);
     }
 
   } catch (error) {
